@@ -9,6 +9,7 @@ type AppState = 'loading' | 'ready' | 'error';
 
 interface TaskItemProps {
   task: Task;
+  index: number;
   onToggle: (id: string) => void;
   onEdit: (id: string, title: string) => void;
   onDelete: (id: string) => void;
@@ -16,7 +17,7 @@ interface TaskItemProps {
 
 // ─── TaskItem ─────────────────────────────────────────────────────────────────
 
-function TaskItem({ task, onToggle, onEdit, onDelete }: TaskItemProps) {
+function TaskItem({ task, index, onToggle, onEdit, onDelete }: TaskItemProps) {
   const [editing, setEditing] = useState(false);
   const [editValue, setEditValue] = useState(task.title);
   const [busy, setBusy] = useState(false);
@@ -39,18 +40,24 @@ function TaskItem({ task, onToggle, onEdit, onDelete }: TaskItemProps) {
   }
 
   return (
-    <li className={`task-item${task.completed ? ' task-completed' : ''}`}>
-      <input
-        type="checkbox"
-        className="task-checkbox"
-        checked={task.completed}
-        disabled={busy}
-        onChange={() => {
-          setBusy(true);
-          onToggle(task.id);
-        }}
-        aria-label={task.completed ? 'Mark incomplete' : 'Mark complete'}
-      />
+    <li
+      className={`task-item${task.completed ? ' task-completed' : ''}`}
+      style={{ animationDelay: `${index * 40}ms` }}
+    >
+      {/* Custom checkbox */}
+      <div className="task-checkbox-wrap">
+        <input
+          type="checkbox"
+          className="task-checkbox"
+          checked={task.completed}
+          disabled={busy}
+          onChange={() => {
+            setBusy(true);
+            onToggle(task.id);
+          }}
+          aria-label={task.completed ? 'Mark incomplete' : 'Mark complete'}
+        />
+      </div>
 
       {editing ? (
         <form className="task-edit-form" onSubmit={handleEditSubmit}>
@@ -81,7 +88,7 @@ function TaskItem({ task, onToggle, onEdit, onDelete }: TaskItemProps) {
             disabled={busy}
             aria-label="Edit task"
           >
-            Edit
+            ✏️ Edit
           </button>
           <button
             className="btn btn-delete"
@@ -92,7 +99,7 @@ function TaskItem({ task, onToggle, onEdit, onDelete }: TaskItemProps) {
             disabled={busy}
             aria-label="Delete task"
           >
-            Delete
+            🗑️ Delete
           </button>
         </div>
       )}
@@ -109,7 +116,6 @@ export default function App() {
   const [newTitle, setNewTitle] = useState('');
   const [creating, setCreating] = useState(false);
 
-  // Load tasks from the API
   const loadTasks = useCallback(async () => {
     setState('loading');
     setError('');
@@ -127,7 +133,6 @@ export default function App() {
     loadTasks();
   }, [loadTasks]);
 
-  // Create a new task
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     const trimmed = newTitle.trim();
@@ -145,7 +150,6 @@ export default function App() {
     }
   }
 
-  // Toggle complete/incomplete
   async function handleToggle(id: string) {
     setError('');
     try {
@@ -153,11 +157,10 @@ export default function App() {
       setTasks((prev) => prev.map((t) => (t.id === id ? updated : t)));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update task.');
-      await loadTasks(); // re-sync on error
+      await loadTasks();
     }
   }
 
-  // Edit task title
   async function handleEdit(id: string, title: string) {
     setError('');
     try {
@@ -169,7 +172,6 @@ export default function App() {
     }
   }
 
-  // Delete task
   async function handleDelete(id: string) {
     setError('');
     try {
@@ -181,16 +183,33 @@ export default function App() {
     }
   }
 
-  const remaining = tasks.filter((t) => !t.completed).length;
+  const total = tasks.length;
+  const done = tasks.filter((t) => t.completed).length;
+  const remaining = total - done;
+  const pct = total > 0 ? Math.round((done / total) * 100) : 0;
 
   return (
     <div className="app-content">
+
+      {/* ── Progress bar (only when there are tasks) ── */}
+      {total > 0 && (
+        <div className="progress-bar-wrap">
+          <div className="progress-label">
+            <span>Progress</span>
+            <span>{pct}% complete</span>
+          </div>
+          <div className="progress-track">
+            <div className="progress-fill" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      )}
+
       {/* ── New task form ── */}
       <form className="new-task-form" onSubmit={handleCreate}>
         <input
           className="new-task-input"
           type="text"
-          placeholder="Add a new task…"
+          placeholder="What do you need to do today?"
           value={newTitle}
           onChange={(e) => setNewTitle(e.target.value)}
           disabled={creating || state === 'loading'}
@@ -201,13 +220,14 @@ export default function App() {
           type="submit"
           disabled={creating || !newTitle.trim() || state === 'loading'}
         >
-          {creating ? 'Adding…' : 'Add Task'}
+          {creating ? '⏳ Adding…' : '+ Add Task'}
         </button>
       </form>
 
       {/* ── Error banner ── */}
       {error && (
         <div className="error-banner" role="alert">
+          <span className="error-icon">⚠️</span>
           {error}
           <button className="btn btn-retry" onClick={loadTasks}>
             Retry
@@ -217,35 +237,49 @@ export default function App() {
 
       {/* ── Loading state ── */}
       {state === 'loading' && (
-        <p className="status-msg">Loading your tasks…</p>
+        <div className="loading-state">
+          <div className="spinner" />
+          <span>Loading your tasks…</span>
+        </div>
       )}
 
       {/* ── Empty state ── */}
       {state === 'ready' && tasks.length === 0 && (
-        <p className="status-msg empty">
-          No tasks yet — add one above to get started!
-        </p>
+        <div className="empty-state">
+          <span className="empty-icon">🎯</span>
+          <p className="empty-title">No tasks yet</p>
+          <p className="empty-sub">Add your first task above to get started!</p>
+        </div>
       )}
 
       {/* ── Task list ── */}
       {state === 'ready' && tasks.length > 0 && (
         <>
           <ul className="task-list" aria-label="Task list">
-            {tasks.map((task) => (
+            {tasks.map((task, i) => (
               <TaskItem
                 key={task.id}
                 task={task}
+                index={i}
                 onToggle={handleToggle}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />
             ))}
           </ul>
-          <p className="task-summary">
-            {remaining === 0
-              ? '🎉 All tasks complete!'
-              : `${remaining} task${remaining === 1 ? '' : 's'} remaining`}
-          </p>
+
+          <div className="task-footer">
+            {remaining === 0 ? (
+              <p className="task-summary task-summary-done">
+                🎉 All tasks complete!
+              </p>
+            ) : (
+              <p className="task-summary">
+                {remaining} task{remaining === 1 ? '' : 's'} remaining
+                <span className="task-count-badge">{remaining}</span>
+              </p>
+            )}
+          </div>
         </>
       )}
     </div>

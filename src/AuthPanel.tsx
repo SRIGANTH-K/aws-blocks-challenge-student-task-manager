@@ -1,12 +1,3 @@
-/**
- * AuthPanel — handles sign up and sign in using AuthBasic via the authApi proxy.
- *
- * authApi is the state-machine API returned by auth.createApi() on the backend.
- * We call setAuthState({ action, ...fields }) to advance auth through:
- *   signIn   → signed in
- *   signUp   → signed in (no codeDelivery configured, so immediate)
- *   signOut  → signed out
- */
 import React, { useState } from 'react';
 import { authApi } from 'aws-blocks';
 
@@ -38,11 +29,8 @@ export default function AuthPanel({ onAuthenticated }: AuthPanelProps) {
     setBusy(true);
     try {
       if (mode === 'signup') {
-        // Sign up first; since no codeDelivery is configured, the user is
-        // immediately confirmed. Then sign in.
         const signUpResult = await authApi.setAuthState({ action: 'signUp', username: u, password: p });
         if (signUpResult.state !== 'signedIn') {
-          // If signup left us not signed in, follow up with a sign-in
           const signInResult = await authApi.setAuthState({ action: 'signIn', username: u, password: p });
           if (signInResult.state !== 'signedIn') {
             setError(signInResult.error ?? 'Sign in failed after sign up.');
@@ -65,72 +53,93 @@ export default function AuthPanel({ onAuthenticated }: AuthPanelProps) {
   }
 
   return (
-    <div className="auth-card">
-      <h2>Student Task Manager</h2>
+    <div className="auth-page">
+      {/* Logo + tagline above the card */}
+      <div className="auth-logo">📚</div>
+      <p className="auth-tagline">Organize your studies, one task at a time.</p>
 
-      <div className="auth-tabs" role="tablist">
-        <button
-          role="tab"
-          aria-selected={mode === 'signin'}
-          className={`auth-tab${mode === 'signin' ? ' active' : ''}`}
-          onClick={() => { setMode('signin'); setError(''); }}
-        >
-          Sign In
-        </button>
-        <button
-          role="tab"
-          aria-selected={mode === 'signup'}
-          className={`auth-tab${mode === 'signup' ? ' active' : ''}`}
-          onClick={() => { setMode('signup'); setError(''); }}
-        >
-          Sign Up
-        </button>
-      </div>
+      <div className="auth-card">
+        <h2 className="auth-card-title">
+          {mode === 'signin' ? 'Welcome back' : 'Create account'}
+        </h2>
+        <p className="auth-card-sub">
+          {mode === 'signin'
+            ? 'Sign in to access your tasks.'
+            : 'Start managing your tasks in seconds.'}
+        </p>
 
-      <form className="auth-form" onSubmit={handleSubmit} noValidate>
-        <div className="form-group">
-          <label htmlFor="auth-username">Username</label>
-          <input
-            id="auth-username"
-            type="text"
-            autoComplete="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            disabled={busy}
-            placeholder="e.g. alice"
-          />
+        {/* Tab switcher */}
+        <div className="auth-tabs" role="tablist">
+          <button
+            role="tab"
+            aria-selected={mode === 'signin'}
+            className={`auth-tab${mode === 'signin' ? ' active' : ''}`}
+            onClick={() => { setMode('signin'); setError(''); }}
+          >
+            Sign In
+          </button>
+          <button
+            role="tab"
+            aria-selected={mode === 'signup'}
+            className={`auth-tab${mode === 'signup' ? ' active' : ''}`}
+            onClick={() => { setMode('signup'); setError(''); }}
+          >
+            Sign Up
+          </button>
         </div>
 
-        <div className="form-group">
-          <label htmlFor="auth-password">
-            Password{' '}
-            {mode === 'signup' && (
-              <span style={{ fontWeight: 400, color: '#888' }}>(min 8 characters)</span>
-            )}
-          </label>
-          <input
-            id="auth-password"
-            type="password"
-            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            disabled={busy}
-            placeholder="••••••••"
-          />
-        </div>
-
-        {error && (
-          <div className="auth-error" role="alert">
-            {error}
+        <form className="auth-form" onSubmit={handleSubmit} noValidate>
+          {/* Username */}
+          <div className="form-group">
+            <label htmlFor="auth-username">Username</label>
+            <div className="input-wrapper">
+              <span className="input-icon">👤</span>
+              <input
+                id="auth-username"
+                type="text"
+                autoComplete="username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                disabled={busy}
+                placeholder="e.g. alice"
+              />
+            </div>
           </div>
-        )}
 
-        <button className="btn btn-primary" type="submit" disabled={busy}>
-          {busy
-            ? mode === 'signup' ? 'Creating account…' : 'Signing in…'
-            : mode === 'signup' ? 'Create Account' : 'Sign In'}
-        </button>
-      </form>
+          {/* Password */}
+          <div className="form-group">
+            <label htmlFor="auth-password">
+              Password{' '}
+              {mode === 'signup' && <span>(min 8 characters)</span>}
+            </label>
+            <div className="input-wrapper">
+              <span className="input-icon">🔒</span>
+              <input
+                id="auth-password"
+                type="password"
+                autoComplete={mode === 'signup' ? 'new-password' : 'current-password'}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                disabled={busy}
+                placeholder="••••••••"
+              />
+            </div>
+          </div>
+
+          {/* Error */}
+          {error && (
+            <div className="auth-error" role="alert">
+              ⚠️ {error}
+            </div>
+          )}
+
+          <button className="btn btn-primary" type="submit" disabled={busy} style={{ marginTop: '4px' }}>
+            {busy
+              ? mode === 'signup' ? '⏳ Creating account…' : '⏳ Signing in…'
+              : mode === 'signup' ? '🚀 Create Account' : '→ Sign In'}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

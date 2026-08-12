@@ -1,14 +1,3 @@
-/**
- * Frontend entry point — src/index.tsx
- *
- * Bootstraps the React app. Handles auth state at the top level:
- *   - Not signed in → show AuthPanel
- *   - Signed in     → show App (task manager)
- *
- * Auth state is checked via authApi.getAuthState() on mount.
- * authApi is the typed proxy for auth.createApi() — a state machine
- * that tells us whether the user is 'signedIn' or 'signedOut'.
- */
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { authApi } from 'aws-blocks';
@@ -20,7 +9,6 @@ function Root() {
   // null = still checking; string = signed-in username; false = not signed in
   const [user, setUser] = useState<string | null | false>(null);
 
-  // Check if a session already exists (e.g. page refresh while logged in)
   useEffect(() => {
     authApi.getAuthState()
       .then((state) => {
@@ -41,43 +29,39 @@ function Root() {
     }
   }
 
-  // Still checking auth state
+  function refreshUser() {
+    authApi.getAuthState()
+      .then((state) => {
+        if (state.state === 'signedIn' && state.user) {
+          setUser(state.user.username);
+        } else {
+          setUser(false);
+        }
+      })
+      .catch(() => setUser(false));
+  }
+
+  // ── Still checking ────────────────────────────────────────────────────────
   if (user === null) {
     return (
-      <div className="page">
-        <p className="status-msg">Loading…</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div className="spinner" />
       </div>
     );
   }
 
-  // Not signed in — show auth panel
+  // ── Not signed in ─────────────────────────────────────────────────────────
   if (user === false) {
-    return (
-      <div className="page">
-        <AuthPanel
-          onAuthenticated={() => {
-            authApi.getAuthState()
-              .then((state) => {
-                if (state.state === 'signedIn' && state.user) {
-                  setUser(state.user.username);
-                } else {
-                  setUser(false);
-                }
-              })
-              .catch(() => setUser(false));
-          }}
-        />
-      </div>
-    );
+    return <AuthPanel onAuthenticated={refreshUser} />;
   }
 
-  // Signed in — show task manager
+  // ── Signed in ─────────────────────────────────────────────────────────────
   return (
     <div className="page">
       <header className="header">
         <h1>📚 Student Task Manager</h1>
         <div className="header-user">
-          <span>Hello, <strong>{user}</strong></span>
+          <span>Hello, <strong>{user}</strong> 👋</span>
           <button className="btn btn-signout" onClick={handleSignOut}>
             Sign Out
           </button>
