@@ -1,430 +1,426 @@
+<div align="center">
+
 # 📚 Student Task Manager
 
-A beginner-friendly full-stack task management application built with **React**, **TypeScript**, and **AWS Blocks**. Students can sign up, sign in, and manage their own personal task list — create, edit, complete, and delete tasks — with all data persisted per user and all operations protected by authentication.
+**A beginner-friendly full-stack task management app**
+built with React 18, TypeScript, and AWS Blocks —
+runs entirely on your laptop with zero AWS setup required.
 
-The application runs entirely on your local machine with no AWS account needed. AWS Blocks provides local mock implementations of every backend service so the development experience is identical to production.
+<br/>
 
----
+[![Node.js](https://img.shields.io/badge/Node.js-≥22.0.0-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18.3.1-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-6.x-646CFF?style=for-the-badge&logo=vite&logoColor=white)](https://vitejs.dev/)
+[![AWS Blocks](https://img.shields.io/badge/AWS%20Blocks-local--first-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://www.npmjs.com/package/@aws-blocks/blocks)
 
-## Key Features
+<br/>
 
-| Feature | Description |
-|---|---|
-| Sign Up | Create a new account with a username and password (minimum 8 characters) |
-| Sign In | Authenticate with an existing account |
-| Sign Out | End the current session |
-| Create Task | Add a new task by entering a title and clicking "Add Task" |
-| View Tasks | See only your own tasks, listed in the order they were created |
-| Edit Task | Click "Edit" on any task to update its title in place |
-| Complete / Incomplete | Check or uncheck the checkbox on a task to toggle its completion status |
-| Delete Task | Click "Delete" to permanently remove a task |
-| Task Summary | A counter at the bottom shows how many tasks are still incomplete |
-| Loading State | A loading message is shown while tasks are being fetched |
-| Empty State | A prompt is shown when the user has no tasks yet |
-| Error State | An error banner with a "Retry" button is shown if an API call fails |
+> Sign up · Sign in · Create · Edit · Complete · Delete — all in one page, all per-user isolated.
+
+</div>
 
 ---
 
-## Project Structure
+## 🖥️ App Preview
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  📚 Student Task Manager          Hello, alice   Sign Out │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌──────────────────────────────────────┐  [ Add Task ]  │
+│  │  Add a new task…                     │                 │
+│  └──────────────────────────────────────┘                 │
+│                                                          │
+│  ☑  Buy textbooks                      [ Edit ] [Delete] │
+│  ☑  Complete assignment 1              [ Edit ] [Delete] │
+│  ☐  Review lecture notes               [ Edit ] [Delete] │
+│  ☐  Submit project report              [ Edit ] [Delete] │
+│                                                          │
+│                              2 tasks remaining           │
+└──────────────────────────────────────────────────────────┘
+```
+
+---
+
+## ✨ Features
+
+| # | Feature | What it does |
+|---|---|---|
+| 🔐 | **Sign Up** | Create an account — username + password (min 8 chars), signed in immediately |
+| 🔑 | **Sign In** | Authenticate and restore your session from any page refresh |
+| 🚪 | **Sign Out** | End the session and return to the auth screen |
+| ➕ | **Create Task** | Type a title and press Enter or click "Add Task" |
+| 📋 | **View Tasks** | Only your tasks are shown — strict per-user isolation enforced in the backend |
+| ✏️ | **Edit Task** | Click "Edit" to update a task's title inline — Save or press Escape to cancel |
+| ☑️ | **Complete / Incomplete** | Toggle the checkbox to flip a task's `completed` status |
+| 🗑️ | **Delete Task** | Remove a task permanently |
+| 🔢 | **Task Counter** | Shows how many tasks are still incomplete at a glance |
+| ⏳ | **Loading State** | "Loading your tasks…" while the first fetch is in flight |
+| 🫙 | **Empty State** | A friendly prompt when you have no tasks yet |
+| ⚠️ | **Error State** | An error banner with a Retry button if any API call fails |
+| 📱 | **Responsive** | Clean layout on desktop and mobile |
+
+---
+
+## 🚀 Quick Start
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/your-username/student-task-manager.git
+cd student-task-manager
+
+# 2. Install dependencies
+npm install
+
+# 3. Start the local development server (no AWS account needed)
+npm run dev
+```
+
+Open **http://localhost:3000** in your browser, sign up, and start adding tasks.
+
+> **Tip:** Local data (tasks + user accounts) is persisted to `.bb-data/` on disk.
+> Delete that directory to reset everything and start fresh.
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology | Version |
+|---|---|---|
+| **Frontend** | React + TypeScript | 18.3.1 / 5.x |
+| **Styling** | Pure CSS — responsive, accessible | — |
+| **Build Tool** | Vite + `@vitejs/plugin-react` | 6.x / 4.3.4 |
+| **Backend** | AWS Blocks `ApiNamespace` | * |
+| **Auth** | AWS Blocks `AuthBasic` | * |
+| **Storage** | AWS Blocks `KVStore` | * |
+| **Runtime** | Node.js + tsx | ≥22.0.0 / 4.x |
+
+---
+
+## 📁 Project Structure
 
 ```
 student-task-manager/
+│
 ├── aws-blocks/
-│   ├── index.ts           # Backend — AuthBasic, KVStore, ApiNamespace
-│   ├── index.cdk.ts       # CDK stack definition (for AWS deploy)
-│   ├── index.handler.ts   # Lambda handler entry point (for AWS deploy)
-│   ├── package.json       # aws-blocks workspace package
+│   ├── index.ts              # 🔧 Backend — AuthBasic, KVStore, ApiNamespace
+│   ├── index.cdk.ts          # ☁️  CDK stack (AWS deploy)
+│   ├── index.handler.ts      # λ  Lambda handler (AWS deploy)
+│   ├── package.json          # aws-blocks workspace config
 │   └── scripts/
-│       ├── server.ts      # Local dev server startup
-│       ├── sandbox.ts     # Deploy to AWS sandbox
+│       ├── server.ts         # Local dev server entry point
+│       ├── sandbox.ts        # Deploy to AWS sandbox
 │       ├── sandbox-destroy.ts
-│       ├── deploy.ts      # Production deploy
+│       ├── deploy.ts         # Production deploy
 │       ├── destroy.ts
 │       ├── cleanup.ts
 │       └── console.ts
+│
 ├── src/
-│   ├── index.tsx          # React entry point — auth gate, root component
-│   ├── AuthPanel.tsx      # Sign up / sign in form
-│   ├── App.tsx            # Task list, create/edit/toggle/delete
-│   └── app.css            # Application styles
+│   ├── index.tsx             # ⚛️  React root — auth gate, session check
+│   ├── AuthPanel.tsx         # 🔐 Sign up / sign in form
+│   ├── App.tsx               # 📋 Task list — create, edit, toggle, delete
+│   └── app.css               # 🎨 All application styles
+│
 ├── test/
-│   └── e2e.test.ts        # End-to-end tests using the typed API client
-├── index.html             # HTML entry point (React root mount)
-├── vite.config.ts         # Vite + React plugin config
-├── tsconfig.json          # TypeScript config (target ES2022, jsx react-jsx)
-├── package.json           # Project dependencies and npm scripts
-└── cdk.json               # CDK configuration
+│   └── e2e.test.ts           # 🧪 9 end-to-end tests via the typed API client
+│
+├── index.html                # HTML shell (React mounts at #root)
+├── vite.config.ts            # Vite config + React plugin
+├── tsconfig.json             # TypeScript — ES2022, react-jsx, strict
+├── package.json              # Dependencies + npm scripts
+└── cdk.json                  # CDK configuration
 ```
 
 ---
 
-## High-Level Architecture
+## 🏗️ Architecture
 
-```mermaid
-flowchart TD
-    User(["👤 User"])
+### How the pieces connect
 
-    subgraph Frontend["Frontend (React + TypeScript)"]
-        Root["src/index.tsx\nAuth gate + Root"]
-        AuthPanel["src/AuthPanel.tsx\nSign up / Sign in"]
-        AppComp["src/App.tsx\nTask list + CRUD UI"]
-    end
-
-    subgraph AWSBlocks["AWS Blocks"]
-        AuthAPI["authApi\nAuthBasic state machine"]
-        API["api\nApiNamespace"]
-
-        subgraph Backend["Backend — aws-blocks/index.ts"]
-            AuthBasic["AuthBasic\nSession + password policy"]
-            ListTasks["listTasks()"]
-            CreateTask["createTask()"]
-            UpdateTask["updateTask()"]
-            ToggleTask["toggleTask()"]
-            DeleteTask["deleteTask()"]
-        end
-
-        subgraph Storage["KVStore (local: .bb-data/)"]
-            TaskStore["taskStore\ntasks:<userId>:<taskId> → Task"]
-            IndexStore["indexStore\ntask-index:<userId> → taskId[]"]
-        end
-    end
-
-    User --> Root
-    Root --> AuthPanel
-    Root --> AppComp
-    AuthPanel --> AuthAPI
-    AuthAPI --> AuthBasic
-    AppComp --> API
-    API --> ListTasks
-    API --> CreateTask
-    API --> UpdateTask
-    API --> ToggleTask
-    API --> DeleteTask
-    ListTasks --> TaskStore
-    ListTasks --> IndexStore
-    CreateTask --> TaskStore
-    CreateTask --> IndexStore
-    UpdateTask --> TaskStore
-    ToggleTask --> TaskStore
-    DeleteTask --> TaskStore
-    DeleteTask --> IndexStore
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     Browser (React + TypeScript)            │
+│                                                             │
+│  src/index.tsx  →  src/AuthPanel.tsx  (sign up / sign in)  │
+│       │         →  src/App.tsx        (task CRUD UI)        │
+│       │                                                     │
+│  import { api, authApi } from 'aws-blocks'                  │
+│  (typed proxy — no manual fetch, no REST routes to write)   │
+└──────────────────────┬──────────────────────────────────────┘
+                       │ JSON-RPC  POST /aws-blocks/api
+┌──────────────────────▼──────────────────────────────────────┐
+│              AWS Blocks Dev Server  (npm run dev)           │
+│                                                             │
+│  ┌─────────────┐   ┌───────────────────────────────────┐   │
+│  │  AuthBasic  │   │          ApiNamespace             │   │
+│  │             │   │  createTask  · listTasks          │   │
+│  │  requireAuth│   │  updateTask  · toggleTask         │   │
+│  │  createApi  │   │  deleteTask                       │   │
+│  └─────────────┘   └──────────────┬────────────────────┘   │
+│                                   │                         │
+│  ┌────────────────────────────────▼────────────────────┐   │
+│  │                    KVStore                          │   │
+│  │  taskStore   →  tasks:<userId>:<taskId>  (Task)     │   │
+│  │  indexStore  →  task-index:<userId>      (string[]) │   │
+│  └─────────────────────────────────────────────────────┘   │
+│  Local: data written to .bb-data/ · AWS: DynamoDB           │
+└─────────────────────────────────────────────────────────────┘
 ```
 
-### Component Summary
+### Component table
 
-| Component | Purpose |
-|---|---|
-| **React + TypeScript** | Single-page frontend UI — auth gate, task list, forms |
-| **AuthBasic** | Username/password authentication with `HttpOnly` session cookies and a minimum password length of 8 characters |
-| **ApiNamespace** | Exposes backend methods (`listTasks`, `createTask`, `updateTask`, `toggleTask`, `deleteTask`) as a type-safe RPC proxy imported directly by the frontend |
-| **KVStore** | Key-value storage for task objects and per-user task ID indexes |
-| **AWS Blocks** | Framework that wires the above together, runs local mocks during development, and deploys to AWS unchanged |
+| Component | File | Purpose |
+|---|---|---|
+| **Root** | `src/index.tsx` | Checks session on mount, gates between AuthPanel and App |
+| **AuthPanel** | `src/AuthPanel.tsx` | Sign up and sign in via the AuthBasic state machine |
+| **App** | `src/App.tsx` | Task list with full CRUD — uses `api` from `aws-blocks` |
+| **AuthBasic** | `aws-blocks/index.ts` | Username/password auth, `HttpOnly` JWT session cookie, 8-char min |
+| **ApiNamespace** | `aws-blocks/index.ts` | Five typed RPC methods exposed to the frontend |
+| **KVStore ×2** | `aws-blocks/index.ts` | `taskStore` for Task objects, `indexStore` for ordered ID lists |
 
 ---
 
-## Full-Stack Data Flow
+## 🔄 Full-Stack Data Flow
 
-The following diagram shows what happens when the user creates a new task. All other operations (edit, toggle, delete) follow the same path — only the backend method and KVStore operation differ.
+Every user action follows the same path. Here it is for **Create Task** — the most write-heavy operation:
 
 ```mermaid
 sequenceDiagram
     actor User
-    participant UI as React UI (App.tsx)
-    participant Proxy as api (aws-blocks client proxy)
-    participant NS as ApiNamespace (aws-blocks/index.ts)
+    participant UI as App.tsx
+    participant Proxy as api (aws-blocks proxy)
+    participant NS as ApiNamespace
     participant Auth as AuthBasic.requireAuth()
-    participant TS as taskStore (KVStore<Task>)
-    participant IS as indexStore (KVStore<string[]>)
+    participant TS as taskStore KVStore‹Task›
+    participant IS as indexStore KVStore‹string[]›
 
-    User->>UI: Types a title and clicks "Add Task"
+    User->>UI: Types title · clicks "Add Task"
     UI->>Proxy: api.createTask(title)
-    Proxy->>NS: JSON-RPC POST /aws-blocks/api
-    NS->>Auth: requireAuth(context)
+    Proxy->>NS: POST /aws-blocks/api  { method: "createTask", params: [title] }
+    NS->>Auth: requireAuth(context) — reads HttpOnly cookie
     Auth-->>NS: { username: "alice" }
-    NS->>TS: taskStore.put("tasks:alice:<id>", task)
+    NS->>TS: taskStore.put("tasks:alice:1j3k-ab4x", task)
     NS->>IS: indexStore.get("task-index:alice")
-    IS-->>NS: [...existingIds]
-    NS->>IS: indexStore.put("task-index:alice", [...existingIds, id])
-    NS-->>Proxy: Task object
-    Proxy-->>UI: Task object (typed)
-    UI->>UI: Appends task to local state — no full reload needed
+    IS-->>NS: ["prev-id-1", "prev-id-2"]
+    NS->>IS: indexStore.put("task-index:alice", [..., "1j3k-ab4x"])
+    NS-->>Proxy: Task { id, title, completed: false, createdAt, userId }
+    Proxy-->>UI: Task (fully typed)
+    UI->>UI: setTasks(prev → [...prev, task])  — no full reload
 ```
 
-**Step by step:**
+**In plain English:**
 
-1. The user types a task title and submits the form in `App.tsx`.
-2. `App.tsx` calls `api.createTask(title)` — `api` is the AWS Blocks typed proxy imported from `aws-blocks`.
-3. The proxy sends a JSON-RPC request to `POST http://localhost:3000/aws-blocks/api`.
-4. `ApiNamespace` receives the request and calls `auth.requireAuth(context)`, which reads the `HttpOnly` session cookie. If no valid session exists, it throws a 401 and the request is rejected.
-5. The backend generates a unique task ID and builds the `Task` object (`id`, `title`, `completed: false`, `createdAt`, `userId`).
-6. `taskStore.put(...)` writes the full task object to KVStore under the key `tasks:<userId>:<taskId>`.
-7. `indexStore` is read to get the user's current list of task IDs, the new ID is appended, and the updated list is written back.
-8. The new `Task` object is returned to the frontend.
-9. `App.tsx` appends the task to its local React state — the UI updates immediately without re-fetching the full list.
+1. User submits the form — `App.tsx` calls `api.createTask(title)`.
+2. The AWS Blocks client proxy sends a single JSON-RPC `POST` to `/aws-blocks/api`.
+3. `ApiNamespace` receives the call and immediately calls `auth.requireAuth(context)`.
+4. `requireAuth` reads the `HttpOnly` session cookie — throws 401 if missing or expired.
+5. A unique task ID is generated (`Date.now().toString(36) + random`), a `Task` object is built.
+6. `taskStore.put(...)` writes the full task to `tasks:alice:<taskId>`.
+7. `indexStore` is read, the new ID is appended, and the updated list is written back.
+8. The `Task` is returned to the frontend as a typed object.
+9. React appends it to local state — the UI updates instantly, no re-fetch needed.
 
 ---
 
-## CRUD Workflows
+## ⚙️ Backend API Reference
 
-```mermaid
-flowchart TD
-    UI["React UI"]
+All methods live in `aws-blocks/index.ts` inside the `ApiNamespace`. Every single one calls `auth.requireAuth(context)` first.
 
-    UI -->|"api.createTask(title)"| Create
-    UI -->|"api.listTasks()"| Read
-    UI -->|"api.updateTask(id, title)"| Update
-    UI -->|"api.toggleTask(id)"| Toggle
-    UI -->|"api.deleteTask(id)"| Delete
+| Method | Signature | Returns | What it does |
+|---|---|---|---|
+| `listTasks` | `() → Task[]` | All tasks for the signed-in user | Reads ID list from `indexStore`, fetches each `Task` from `taskStore` in order |
+| `createTask` | `(title: string) → Task` | The new task | Writes task to `taskStore`, appends ID to `indexStore` |
+| `updateTask` | `(taskId, title) → Task` | The updated task | Reads task, verifies ownership, writes new title back |
+| `toggleTask` | `(taskId) → Task` | The updated task | Reads task, verifies ownership, flips `completed`, writes back |
+| `deleteTask` | `(taskId) → { success }` | `{ success: true }` | Deletes from `taskStore`, removes ID from `indexStore` |
 
-    subgraph Backend["ApiNamespace — aws-blocks/index.ts"]
-        Create["createTask()\nBuild Task object\nWrite to taskStore\nAppend id to indexStore"]
-        Read["listTasks()\nRead indexStore for userId\nFetch each Task from taskStore"]
-        Update["updateTask()\nRead task from taskStore\nVerify userId matches session\nWrite updated Task back"]
-        Toggle["toggleTask()\nRead task from taskStore\nVerify userId matches session\nFlip completed flag, write back"]
-        Delete["deleteTask()\nRead task from taskStore\nVerify userId matches session\nDelete from taskStore\nRemove id from indexStore"]
-    end
-
-    subgraph KVStore["KVStore (local: .bb-data/)"]
-        TS["taskStore\ntasks:<userId>:<taskId>"]
-        IS["indexStore\ntask-index:<userId>"]
-    end
-
-    Create --> TS
-    Create --> IS
-    Read --> IS
-    Read --> TS
-    Update --> TS
-    Toggle --> TS
-    Delete --> TS
-    Delete --> IS
-```
-
-### How each operation works in the backend
-
-**Create** (`createTask(title: string) → Task`)
-- Requires an authenticated session.
-- Generates a unique ID from the current timestamp and a random suffix.
-- Writes the full `Task` object to `taskStore` at key `tasks:<userId>:<taskId>`.
-- Reads the user's task ID list from `indexStore`, appends the new ID, and writes the list back.
-- Returns the new `Task` to the frontend.
-
-**Read** (`listTasks() → Task[]`)
-- Requires an authenticated session.
-- Reads the user's ordered task ID list from `indexStore` at key `task-index:<userId>`. Returns an empty array if none exists.
-- For each ID, fetches the full `Task` object from `taskStore`.
-- Returns the tasks in the same order as the index (creation order).
-
-**Update** (`updateTask(taskId: string, title: string) → Task`)
-- Requires an authenticated session.
-- Reads the existing task from `taskStore`.
-- Verifies the stored `task.userId` matches the authenticated user (returns `Forbidden` if not).
-- Writes the updated task (new title, all other fields unchanged) back to `taskStore`.
-- Returns the updated `Task`.
-
-**Toggle** (`toggleTask(taskId: string) → Task`)
-- Requires an authenticated session.
-- Reads the existing task from `taskStore`.
-- Verifies ownership.
-- Flips the `completed` boolean and writes the updated task back.
-- Returns the updated `Task`.
-
-**Delete** (`deleteTask(taskId: string) → { success: boolean }`)
-- Requires an authenticated session.
-- Reads the existing task from `taskStore` and verifies ownership.
-- Deletes the task object from `taskStore`.
-- Reads the user's task ID list from `indexStore`, removes the deleted ID, and writes the list back.
-- Returns `{ success: true }`.
-
----
-
-## User-Scoped Data & Security
-
-Every task is owned by exactly one user. This is enforced at two independent levels in `aws-blocks/index.ts`:
-
-**1. KVStore key scoping**
-
-All task keys include the authenticated user's username:
-
-```
-tasks:<userId>:<taskId>    →  Task object
-task-index:<userId>        →  string[] of task IDs
-```
-
-A user reading `listTasks()` only ever fetches keys prefixed with their own `userId`, so they cannot see another user's tasks.
-
-**2. Ownership check on every mutation**
-
-Every write operation (`updateTask`, `toggleTask`, `deleteTask`) reads the task from the store and explicitly checks:
+### Task data shape
 
 ```typescript
-if (task.userId !== user.username) throw new Error('Forbidden');
+type Task = {
+  id:        string;   // "1j3k-ab4x"  — timestamp(base36) + random suffix
+  title:     string;   // trimmed on write
+  completed: boolean;  // always false on create
+  createdAt: number;   // Date.now() — Unix ms timestamp
+  userId:    string;   // username of the owner, from auth.requireAuth()
+};
 ```
 
-This means that even if someone guessed another user's task key, the check would reject the operation.
+---
 
-**3. `requireAuth` on every method**
+## 🔒 Security & User Isolation
 
-Every API method starts with:
+Three independent layers prevent any user from touching another user's data.
+
+### 1 — Every method requires authentication
 
 ```typescript
 const user = await auth.requireAuth(context);
+// ↑ throws SessionExpiredException (401) if no valid cookie
 ```
 
-This reads the `HttpOnly` session cookie set during sign-in. If the cookie is missing, expired, or invalid, the method throws a 401 before any data is accessed.
+### 2 — KVStore keys are scoped to the authenticated userId
 
----
+```
+taskStore:   tasks:<userId>:<taskId>   →  Task object
+indexStore:  task-index:<userId>       →  string[] of taskIds
+```
 
-## Task Data Shape
+`listTasks` only ever reads keys with the *session* `userId` as the prefix — it is structurally impossible to read another user's tasks.
 
-Every task is stored as a JSON object with these fields:
-
-| Field | Type | Description |
-|---|---|---|
-| `id` | `string` | Unique task identifier (timestamp + random suffix) |
-| `title` | `string` | The task title (whitespace-trimmed) |
-| `completed` | `boolean` | Whether the task is marked complete |
-| `createdAt` | `number` | Unix timestamp (ms) when the task was created |
-| `userId` | `string` | The username of the task owner |
-
----
-
-## Authentication Flow
-
-Authentication is handled by `AuthBasic` from AWS Blocks, configured in `aws-blocks/index.ts`:
+### 3 — Ownership is double-checked on every mutation
 
 ```typescript
-const auth = new AuthBasic(scope, 'auth', {
-  passwordPolicy: { minLength: 8 },
-  crossDomain: process.env.BLOCKS_SANDBOX === 'true',
-});
-export const authApi = auth.createApi();
+const task = await taskStore.get(taskKey(user.username, taskId));
+if (!task) throw new Error('Task not found');
+if (task.userId !== user.username) throw new Error('Forbidden');
 ```
 
-`authApi` is exported and imported by the frontend as a typed proxy. It exposes a state machine driven by `getAuthState()` and `setAuthState()`.
-
-**Sign up flow (in `AuthPanel.tsx`):**
-
-```
-setAuthState({ action: 'signUp', username, password })
-  → if state !== 'signedIn':
-      setAuthState({ action: 'signIn', username, password })
-```
-
-Since no `codeDelivery` callback is configured, sign-up is immediate — no email verification step.
-
-**Sign in flow:**
-
-```
-setAuthState({ action: 'signIn', username, password })
-  → returns AuthState { state: 'signedIn', user: { username } }
-```
-
-A signed session cookie is set automatically.
-
-**Session check on page load (in `src/index.tsx`):**
-
-```
-getAuthState()
-  → state.state === 'signedIn' → show App
-  → otherwise                  → show AuthPanel
-```
-
-**Sign out:**
-
-```
-setAuthState({ action: 'signOut' })
-  → clears the session cookie
-  → UI returns to AuthPanel
-```
+Even if a task key was somehow guessed, the `task.userId !== user.username` check rejects the request before any write occurs.
 
 ---
 
-## Local Development
+## 🔐 Authentication Flow
 
-The application runs fully locally with no AWS account required. AWS Blocks replaces all cloud services with local mock implementations:
+Auth uses the `AuthBasic` state machine via `authApi` (the typed proxy for `auth.createApi()`).
 
-- **KVStore** persists data to `.bb-data/` on disk between server restarts.
-- **AuthBasic** issues local JWTs instead of using DynamoDB.
-- The API is served on `http://localhost:3000/aws-blocks/api`.
-- The frontend Vite dev server runs on `http://localhost:3100`.
+```
+── Sign Up ────────────────────────────────────────────────────
+AuthPanel calls:
+  setAuthState({ action: 'signUp', username, password })
+    → state === 'signedIn'  ✓  (immediate — no email verification)
+    → state !== 'signedIn'  → follow up with signIn action
 
-### Prerequisites
+── Sign In ────────────────────────────────────────────────────
+  setAuthState({ action: 'signIn', username, password })
+    → state === 'signedIn'  ✓  session cookie set (HttpOnly)
+    → state !== 'signedIn'  → show error from result.error
 
-- **Node.js >= 22** — check with `node --version`
-- **npm >= 10** — check with `npm --version`
+── Session Check on Page Load (src/index.tsx) ─────────────────
+  getAuthState()
+    → state === 'signedIn'  → render App  (task manager)
+    → otherwise             → render AuthPanel
 
-### Install dependencies
+── Sign Out ───────────────────────────────────────────────────
+  setAuthState({ action: 'signOut' })
+    → cookie cleared → render AuthPanel
+```
+
+Password policy (configured in `aws-blocks/index.ts`): minimum length **8 characters**.
+
+---
+
+## 💾 KVStore Design
+
+Two separate typed `KVStore` instances back all task storage:
+
+```typescript
+// Task objects — one entry per task
+const taskStore  = new KVStore<Task>(scope, 'todos', {});
+//   key pattern:  tasks:<userId>:<taskId>
+
+// Per-user ordered list of task IDs
+const indexStore = new KVStore<string[]>(scope, 'todos-index', {});
+//   key pattern:  task-index:<userId>
+```
+
+**Why two stores?**
+KVStore is a simple key-value map — there are no query or scan operations used here. The `indexStore` acts as a lightweight secondary index: it stores the creation-ordered list of task IDs for each user, so `listTasks` can return tasks in the correct order without scanning all keys.
+
+**Local persistence:**
+In development, both stores write JSON to `.bb-data/todos/` and `.bb-data/todos-index/`. Data survives server restarts. Delete `.bb-data/` to reset.
+
+---
+
+## 🧪 End-to-End Tests
+
+`test/e2e.test.ts` calls the API through the same typed proxy the frontend uses — no browser, no mocking, no HTTP client setup.
+
+```
+✔  auth: starts signed out                        (187ms)
+✔  auth: sign up creates account and signs in     (980ms)
+✔  auth: unauthenticated access is rejected       (530ms)
+✔  tasks: create a task                           ( 24ms)
+✔  tasks: list returns only own tasks             ( 10ms)
+✔  tasks: update task title                       ( 16ms)
+✔  tasks: toggle completion                       ( 20ms)
+✔  tasks: delete a task                           ( 30ms)
+✔  tasks: tasks persist across list calls         ( 23ms)
+
+  9 tests · 0 failures · ~1.9s total
+```
+
+Run them:
 
 ```bash
-npm install
+# The runner starts a dev server automatically if one isn't running.
+# For faster iteration, start the server first in a separate terminal.
+
+npm run dev        # terminal 1
+npm run test:e2e   # terminal 2
 ```
 
-### Start the development server
+---
+
+## 📜 Available Scripts
+
+| Script | Description |
+|---|---|
+| `npm run dev` | Start the local dev server — backend + Vite frontend at **http://localhost:3000** |
+| `npm run dev:server` | Start the backend server only (same as `dev`) |
+| `npm run build` | Type-check + Vite production build → `dist/` |
+| `npm run preview` | Serve the production build locally |
+| `npm run typecheck` | TypeScript type check without emitting files |
+| `npm run test:e2e` | Run the 9 end-to-end API tests |
+| `npm run sandbox` | Deploy to a real AWS sandbox environment |
+| `npm run sandbox:destroy` | Tear down the AWS sandbox stack |
+| `npm run deploy` | Full production deploy to AWS |
+| `npm run destroy` | Tear down the production AWS stack |
+| `npm run cleanup` | Clean up local build artefacts |
+
+---
+
+## ☁️ Deploying to AWS
+
+The **same** `aws-blocks/index.ts` backend code that runs locally deploys to AWS unchanged. Blocks swap the local mocks for real AWS services automatically.
 
 ```bash
-npm run dev
+# Prerequisite: AWS credentials configured + CDK bootstrapped
+aws configure
+npx cdk bootstrap
+
+# Deploy a personal sandbox (real DynamoDB, real auth, real API Gateway)
+npm run sandbox
+
+# Tear it down when you're done
+npm run sandbox:destroy
+
+# Full production deploy (includes CloudFront + S3 hosting for the frontend)
+npm run deploy
 ```
 
-This starts both the AWS Blocks backend server and the Vite frontend dev server. Open `http://localhost:3000` in your browser.
-
-> To reset all local data (tasks and user accounts), delete the `.bb-data/` directory.
-
----
-
-## Available npm Scripts
-
-| Script | Command | Description |
-|---|---|---|
-| `npm run dev` | `tsx watch aws-blocks/scripts/server.ts` | Start the local development server (backend + frontend) |
-| `npm run dev:server` | `tsx watch aws-blocks/scripts/server.ts` | Same as `dev` — start the backend server only |
-| `npm run build` | `tsc && vite build` | Type-check and build the frontend for production (`dist/`) |
-| `npm run preview` | `vite preview` | Preview the production build locally |
-| `npm run typecheck` | `tsc --noEmit` | Run TypeScript type checking without emitting files |
-| `npm run test:e2e` | `tsx -C browser test/e2e.test.ts` | Run the end-to-end test suite against a running dev server |
-| `npm run sandbox` | `tsx aws-blocks/scripts/sandbox.ts` | Deploy to an AWS sandbox environment (requires AWS account) |
-| `npm run sandbox:destroy` | `tsx -C cdk aws-blocks/scripts/sandbox-destroy.ts` | Tear down the AWS sandbox stack |
-| `npm run deploy` | `tsx aws-blocks/scripts/deploy.ts` | Deploy to production AWS (requires AWS account) |
-| `npm run destroy` | `tsx aws-blocks/scripts/destroy.ts` | Tear down the production AWS stack |
-| `npm run cleanup` | `tsx aws-blocks/scripts/cleanup.ts` | Clean up local build artefacts |
+| Environment | Auth | Storage | Frontend |
+|---|---|---|---|
+| `npm run dev` | Local JWT mock | `.bb-data/` on disk | Vite dev server |
+| `npm run sandbox` | DynamoDB-backed JWTs | Amazon DynamoDB | API Gateway |
+| `npm run deploy` | DynamoDB-backed JWTs | Amazon DynamoDB | CloudFront + S3 |
 
 ---
 
-## End-to-End Tests
+## 🤝 Contributing
 
-The test suite in `test/e2e.test.ts` tests the API through the same typed client the frontend uses — no browser, no mocking. It covers:
-
-- Auth starts signed out
-- Sign up creates an account and signs in
-- Unauthenticated access is rejected
-- Create a task
-- List tasks (returns only the signed-in user's tasks)
-- Update a task title
-- Toggle task completion (and toggle back)
-- Delete a task
-- Tasks persist across multiple `listTasks` calls
-
-Run the tests against a running dev server:
-
-```bash
-# Terminal 1 — start the server (skip if already running)
-npm run dev
-
-# Terminal 2 — run the tests
-npm run test:e2e
-```
-
-The test runner will start the dev server automatically if one is not already running.
+1. Fork the repository
+2. Create a feature branch — `git checkout -b feature/my-feature`
+3. Commit your changes — `git commit -m "feat: describe what changed"`
+4. Push and open a Pull Request
 
 ---
 
-## Technologies
+<div align="center">
 
-| Technology | Version | Role |
-|---|---|---|
-| React | 18.3.1 | Frontend UI framework |
-| TypeScript | ^5.3.0 | Type safety across frontend and backend |
-| AWS Blocks (`@aws-blocks/blocks`) | * | Full-stack framework — auth, storage, API |
-| Vite | ^6.4.3 | Frontend build tool and dev server |
-| `@vitejs/plugin-react` | 4.3.4 | React JSX transform for Vite |
-| `tsx` | ^4.7.0 | TypeScript execution for backend scripts |
-| Node.js | >= 22.0.0 | Runtime requirement |
+Built with ❤️ using [AWS Blocks](https://www.npmjs.com/package/@aws-blocks/blocks) · [React](https://react.dev/) · [TypeScript](https://www.typescriptlang.org/) · [Vite](https://vitejs.dev/)
+
+</div>
