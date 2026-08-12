@@ -1,4 +1,4 @@
-````markdown
+
 <div align="center">
 
 # 📚 Student Task Manager
@@ -63,7 +63,7 @@ npm install
 
 # 3. Start the local development server (no AWS account needed)
 npm run dev
-````
+
 
 Open **http://localhost:3000** in your browser, sign up, and start adding tasks.
 
