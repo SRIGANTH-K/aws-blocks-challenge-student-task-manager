@@ -55,15 +55,15 @@ runs entirely on your laptop with zero AWS setup required.
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/your-username/student-task-manager.git
-cd student-task-manager
+git clone https://github.com/SRIGANTH-K/aws-blocks-challenge-student-task-manager.git
+cd aws-blocks-challenge-student-task-manager
 
 # 2. Install dependencies
 npm install
 
 # 3. Start the local development server (no AWS account needed)
 npm run dev
-
+```
 
 Open **http://localhost:3000** in your browser, sign up, and start adding tasks.
 
@@ -347,4 +347,3 @@ npm run deploy
 Built with ❤️ using [AWS Blocks](https://www.npmjs.com/package/@aws-blocks/blocks) · [React](https://react.dev/) · [TypeScript](https://www.typescriptlang.org/) · [Vite](https://vitejs.dev/)
 
 </div>
-```
