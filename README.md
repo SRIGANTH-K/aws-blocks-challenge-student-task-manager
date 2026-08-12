@@ -1,3 +1,4 @@
+````markdown
 <div align="center">
 
 # 📚 Student Task Manager
@@ -62,7 +63,7 @@ npm install
 
 # 3. Start the local development server (no AWS account needed)
 npm run dev
-```
+````
 
 Open **http://localhost:3000** in your browser, sign up, and start adding tasks.
 
@@ -73,15 +74,15 @@ Open **http://localhost:3000** in your browser, sign up, and start adding tasks.
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology | Version |
-|---|---|---|
-| **Frontend** | React + TypeScript | 18.3.1 / 5.x |
-| **Styling** | Pure CSS — responsive, accessible | — |
-| **Build Tool** | Vite + `@vitejs/plugin-react` | 6.x / 4.3.4 |
-| **Backend** | AWS Blocks `ApiNamespace` | * |
-| **Auth** | AWS Blocks `AuthBasic` | * |
-| **Storage** | AWS Blocks `KVStore` | * |
-| **Runtime** | Node.js + tsx | ≥22.0.0 / 4.x |
+| Layer          | Technology                        | Version       |
+| -------------- | --------------------------------- | ------------- |
+| **Frontend**   | React + TypeScript                | 18.3.1 / 5.x  |
+| **Styling**    | Pure CSS — responsive, accessible | —             |
+| **Build Tool** | Vite + `@vitejs/plugin-react`     | 6.x / 4.3.4   |
+| **Backend**    | AWS Blocks `ApiNamespace`         | *             |
+| **Auth**       | AWS Blocks `AuthBasic`            | *             |
+| **Storage**    | AWS Blocks `KVStore`              | *             |
+| **Runtime**    | Node.js + tsx                     | ≥22.0.0 / 4.x |
 
 ---
 
@@ -126,46 +127,20 @@ student-task-manager/
 
 ### How the pieces connect
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                     Browser (React + TypeScript)            │
-│                                                             │
-│  src/index.tsx  →  src/AuthPanel.tsx  (sign up / sign in)  │
-│       │         →  src/App.tsx        (task CRUD UI)        │
-│       │                                                     │
-│  import { api, authApi } from 'aws-blocks'                  │
-│  (typed proxy — no manual fetch, no REST routes to write)   │
-└──────────────────────┬──────────────────────────────────────┘
-                       │ JSON-RPC  POST /aws-blocks/api
-┌──────────────────────▼──────────────────────────────────────┐
-│              AWS Blocks Dev Server  (npm run dev)           │
-│                                                             │
-│  ┌─────────────┐   ┌───────────────────────────────────┐   │
-│  │  AuthBasic  │   │          ApiNamespace             │   │
-│  │             │   │  createTask  · listTasks          │   │
-│  │  requireAuth│   │  updateTask  · toggleTask         │   │
-│  │  createApi  │   │  deleteTask                       │   │
-│  └─────────────┘   └──────────────┬────────────────────┘   │
-│                                   │                         │
-│  ┌────────────────────────────────▼────────────────────┐   │
-│  │                    KVStore                          │   │
-│  │  taskStore   →  tasks:<userId>:<taskId>  (Task)     │   │
-│  │  indexStore  →  task-index:<userId>      (string[]) │   │
-│  └─────────────────────────────────────────────────────┘   │
-│  Local: data written to .bb-data/ · AWS: DynamoDB           │
-└─────────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="images/architecture.png" alt="Student Task Manager Architecture" width="100%">
+</p>
 
 ### Component table
 
-| Component | File | Purpose |
-|---|---|---|
-| **Root** | `src/index.tsx` | Checks session on mount, gates between AuthPanel and App |
-| **AuthPanel** | `src/AuthPanel.tsx` | Sign up and sign in via the AuthBasic state machine |
-| **App** | `src/App.tsx` | Task list with full CRUD — uses `api` from `aws-blocks` |
-| **AuthBasic** | `aws-blocks/index.ts` | Username/password auth, `HttpOnly` JWT session cookie, 8-char min |
-| **ApiNamespace** | `aws-blocks/index.ts` | Five typed RPC methods exposed to the frontend |
-| **KVStore ×2** | `aws-blocks/index.ts` | `taskStore` for Task objects, `indexStore` for ordered ID lists |
+| Component        | File                  | Purpose                                                           |
+| ---------------- | --------------------- | ----------------------------------------------------------------- |
+| **Root**         | `src/index.tsx`       | Checks session on mount, gates between AuthPanel and App          |
+| **AuthPanel**    | `src/AuthPanel.tsx`   | Sign up and sign in via the AuthBasic state machine               |
+| **App**          | `src/App.tsx`         | Task list with full CRUD — uses `api` from `aws-blocks`           |
+| **AuthBasic**    | `aws-blocks/index.ts` | Username/password auth, `HttpOnly` JWT session cookie, 8-char min |
+| **ApiNamespace** | `aws-blocks/index.ts` | Five typed RPC methods exposed to the frontend                    |
+| **KVStore ×2**   | `aws-blocks/index.ts` | `taskStore` for Task objects, `indexStore` for ordered ID lists   |
 
 ---
 
@@ -173,29 +148,9 @@ student-task-manager/
 
 Every user action follows the same path. Here it is for **Create Task** — the most write-heavy operation:
 
-```mermaid
-sequenceDiagram
-    actor User
-    participant UI as App.tsx
-    participant Proxy as api (aws-blocks proxy)
-    participant NS as ApiNamespace
-    participant Auth as AuthBasic.requireAuth()
-    participant TS as taskStore KVStore‹Task›
-    participant IS as indexStore KVStore‹string[]›
-
-    User->>UI: Types title · clicks "Add Task"
-    UI->>Proxy: api.createTask(title)
-    Proxy->>NS: POST /aws-blocks/api  { method: "createTask", params: [title] }
-    NS->>Auth: requireAuth(context) — reads HttpOnly cookie
-    Auth-->>NS: { username: "alice" }
-    NS->>TS: taskStore.put("tasks:alice:1j3k-ab4x", task)
-    NS->>IS: indexStore.get("task-index:alice")
-    IS-->>NS: ["prev-id-1", "prev-id-2"]
-    NS->>IS: indexStore.put("task-index:alice", [..., "1j3k-ab4x"])
-    NS-->>Proxy: Task { id, title, completed: false, createdAt, userId }
-    Proxy-->>UI: Task (fully typed)
-    UI->>UI: setTasks(prev → [...prev, task])  — no full reload
-```
+<p align="center">
+  <img src="images/dataflow.png" alt="Student Task Manager Full-Stack Data Flow" width="100%">
+</p>
 
 **In plain English:**
 
@@ -215,13 +170,13 @@ sequenceDiagram
 
 All methods live in `aws-blocks/index.ts` inside the `ApiNamespace`. Every single one calls `auth.requireAuth(context)` first.
 
-| Method | Signature | Returns | What it does |
-|---|---|---|---|
-| `listTasks` | `() → Task[]` | All tasks for the signed-in user | Reads ID list from `indexStore`, fetches each `Task` from `taskStore` in order |
-| `createTask` | `(title: string) → Task` | The new task | Writes task to `taskStore`, appends ID to `indexStore` |
-| `updateTask` | `(taskId, title) → Task` | The updated task | Reads task, verifies ownership, writes new title back |
-| `toggleTask` | `(taskId) → Task` | The updated task | Reads task, verifies ownership, flips `completed`, writes back |
-| `deleteTask` | `(taskId) → { success }` | `{ success: true }` | Deletes from `taskStore`, removes ID from `indexStore` |
+| Method       | Signature                | Returns                          | What it does                                                                   |
+| ------------ | ------------------------ | -------------------------------- | ------------------------------------------------------------------------------ |
+| `listTasks`  | `() → Task[]`            | All tasks for the signed-in user | Reads ID list from `indexStore`, fetches each `Task` from `taskStore` in order |
+| `createTask` | `(title: string) → Task` | The new task                     | Writes task to `taskStore`, appends ID to `indexStore`                         |
+| `updateTask` | `(taskId, title) → Task` | The updated task                 | Reads task, verifies ownership, writes new title back                          |
+| `toggleTask` | `(taskId) → Task`        | The updated task                 | Reads task, verifies ownership, flips `completed`, writes back                 |
+| `deleteTask` | `(taskId) → { success }` | `{ success: true }`              | Deletes from `taskStore`, removes ID from `indexStore`                         |
 
 ### Task data shape
 
@@ -273,27 +228,9 @@ Even if a task key was somehow guessed, the `task.userId !== user.username` chec
 
 Auth uses the `AuthBasic` state machine via `authApi` (the typed proxy for `auth.createApi()`).
 
-```
-── Sign Up ────────────────────────────────────────────────────
-AuthPanel calls:
-  setAuthState({ action: 'signUp', username, password })
-    → state === 'signedIn'  ✓  (immediate — no email verification)
-    → state !== 'signedIn'  → follow up with signIn action
-
-── Sign In ────────────────────────────────────────────────────
-  setAuthState({ action: 'signIn', username, password })
-    → state === 'signedIn'  ✓  session cookie set (HttpOnly)
-    → state !== 'signedIn'  → show error from result.error
-
-── Session Check on Page Load (src/index.tsx) ─────────────────
-  getAuthState()
-    → state === 'signedIn'  → render App  (task manager)
-    → otherwise             → render AuthPanel
-
-── Sign Out ───────────────────────────────────────────────────
-  setAuthState({ action: 'signOut' })
-    → cookie cleared → render AuthPanel
-```
+<p align="center">
+  <img src="images/authentication.png" alt="Student Task Manager Authentication Flow" width="100%">
+</p>
 
 Password policy (configured in `aws-blocks/index.ts`): minimum length **8 characters**.
 
@@ -353,19 +290,19 @@ npm run test:e2e   # terminal 2
 
 ## 📜 Available Scripts
 
-| Script | Description |
-|---|---|
-| `npm run dev` | Start the local dev server — backend + Vite frontend at **http://localhost:3000** |
-| `npm run dev:server` | Start the backend server only (same as `dev`) |
-| `npm run build` | Type-check + Vite production build → `dist/` |
-| `npm run preview` | Serve the production build locally |
-| `npm run typecheck` | TypeScript type check without emitting files |
-| `npm run test:e2e` | Run the 9 end-to-end API tests |
-| `npm run sandbox` | Deploy to a real AWS sandbox environment |
-| `npm run sandbox:destroy` | Tear down the AWS sandbox stack |
-| `npm run deploy` | Full production deploy to AWS |
-| `npm run destroy` | Tear down the production AWS stack |
-| `npm run cleanup` | Clean up local build artefacts |
+| Script                    | Description                                                                       |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| `npm run dev`             | Start the local dev server — backend + Vite frontend at **http://localhost:3000** |
+| `npm run dev:server`      | Start the backend server only (same as `dev`)                                     |
+| `npm run build`           | Type-check + Vite production build → `dist/`                                      |
+| `npm run preview`         | Serve the production build locally                                                |
+| `npm run typecheck`       | TypeScript type check without emitting files                                      |
+| `npm run test:e2e`        | Run the 9 end-to-end API tests                                                    |
+| `npm run sandbox`         | Deploy to a real AWS sandbox environment                                          |
+| `npm run sandbox:destroy` | Tear down the AWS sandbox stack                                                   |
+| `npm run deploy`          | Full production deploy to AWS                                                     |
+| `npm run destroy`         | Tear down the production AWS stack                                                |
+| `npm run cleanup`         | Clean up local build artefacts                                                    |
 
 ---
 
@@ -388,11 +325,11 @@ npm run sandbox:destroy
 npm run deploy
 ```
 
-| Environment | Auth | Storage | Frontend |
-|---|---|---|---|
-| `npm run dev` | Local JWT mock | `.bb-data/` on disk | Vite dev server |
-| `npm run sandbox` | DynamoDB-backed JWTs | Amazon DynamoDB | API Gateway |
-| `npm run deploy` | DynamoDB-backed JWTs | Amazon DynamoDB | CloudFront + S3 |
+| Environment       | Auth                 | Storage             | Frontend        |
+| ----------------- | -------------------- | ------------------- | --------------- |
+| `npm run dev`     | Local JWT mock       | `.bb-data/` on disk | Vite dev server |
+| `npm run sandbox` | DynamoDB-backed JWTs | Amazon DynamoDB     | API Gateway     |
+| `npm run deploy`  | DynamoDB-backed JWTs | Amazon DynamoDB     | CloudFront + S3 |
 
 ---
 
@@ -410,3 +347,4 @@ npm run deploy
 Built with ❤️ using [AWS Blocks](https://www.npmjs.com/package/@aws-blocks/blocks) · [React](https://react.dev/) · [TypeScript](https://www.typescriptlang.org/) · [Vite](https://vitejs.dev/)
 
 </div>
+```
