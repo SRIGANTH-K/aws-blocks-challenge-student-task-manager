@@ -24,23 +24,9 @@ runs entirely on your laptop with zero AWS setup required.
 
 ## 🖥️ App Preview
 
-```
-┌──────────────────────────────────────────────────────────┐
-│  📚 Student Task Manager          Hello, alice   Sign Out │
-├──────────────────────────────────────────────────────────┤
-│                                                          │
-│  ┌──────────────────────────────────────┐  [ Add Task ]  │
-│  │  Add a new task…                     │                 │
-│  └──────────────────────────────────────┘                 │
-│                                                          │
-│  ☑  Buy textbooks                      [ Edit ] [Delete] │
-│  ☑  Complete assignment 1              [ Edit ] [Delete] │
-│  ☐  Review lecture notes               [ Edit ] [Delete] │
-│  ☐  Submit project report              [ Edit ] [Delete] │
-│                                                          │
-│                              2 tasks remaining           │
-└──────────────────────────────────────────────────────────┘
-```
+<p align="center">
+  <img src="images/app-preview.png" alt="Student Task Manager Dashboard" width="900">
+</p>
 
 ---
 
